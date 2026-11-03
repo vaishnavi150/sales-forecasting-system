@@ -10,7 +10,7 @@ code. All prompts are in [`PROMPT_HISTORY.md`](PROMPT_HISTORY.md).
 | Problem definition, requirements, tech stack, 12-phase plan, rules for the AI | Me (see `prompts/00_project_instructions.md`) |
 | Assignment specification | Given to me (see `prompts/01_requirements_spec.txt`) |
 | Architecture proposal, data model, scale design | AI proposed; I accepted |
-| Python code (~3,200 lines), SQL schema, tests (~700 lines, 79 tests) | AI wrote all of it |
+| Python code (~3,500 lines), SQL schema, tests (~720 lines, 80 tests) | AI wrote all of it |
 | Running code and tests, finding and fixing bugs during the build | AI, in its sandbox |
 | README, data dictionary, decision and AI-usage documents | AI drafted |
 | Review, testing on my own laptop, edits, publishing to GitHub | Me (see the section below) |
@@ -27,7 +27,7 @@ run, question and validate the result.
 - **Writing a realistic data generator.** This covered slippage, stale deals,
   seasonality, territory changes, quarter-end closing, and outcomes driven by
   documented rules instead of random coin flips.
-- **Boilerplate at scale:** 30+ validation checks, 79 tests, the SQLite schema, the
+- **Boilerplate at scale:** 30+ validation checks, 80 tests, the SQLite schema, the
   Streamlit dashboard and the documentation.
 - **Running experiments quickly.** Examples: comparing four forecasting methods over
   7 quarters, and testing whether weighting by deal amount helps.
@@ -78,6 +78,21 @@ transcript.
 
 The last one is the best evidence that the validation layer works: it caught a real bug
 in the generator, not just the errors we injected on purpose.
+
+## Dashboard redesign (prompt 6)
+
+The first dashboard was functional but plain. On request, the AI redesigned it: a
+forecast range strip as the main visual, interactive charts with tooltips, white
+panels, responsive number cards, and a separate Risks tab. It reviewed its own work by
+taking browser screenshots at two screen widths and fixed what it saw:
+
+- Streamlit's own styles overrode the big forecast number, so it used more specific CSS.
+- The range-strip labels were too small to read, so it resized the drawing.
+- Tables were cut off on the right, so it stacked them or removed duplicate columns.
+- Win chances showed odd decimals ("0.16%"), so they now show whole percentages.
+- The four number cards were squeezed on smaller screens, so they now wrap into two rows.
+
+The dashboard tests were updated for the new layout (3 tests, 80 in total).
 
 ## Limits of what the AI could check
 

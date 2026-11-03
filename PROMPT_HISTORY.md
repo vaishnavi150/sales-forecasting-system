@@ -78,3 +78,26 @@ commits for the real fixes and design changes made during development), this fil
 `AI_USAGE.md`, `docs/DECISIONS.md`, `docs/WALKTHROUGH.md`, a GitHub Actions workflow
 and a verification section in the README. The AI could not log in to GitHub, so I
 created and pushed the public repository myself.
+
+### Prompt 5 — 2026-11-03 11:44
+
+> asslu ee project enti anedi nak ayina em ardham kaledu
+
+*(Telugu, meaning: "I don't understand at all what this project is.")*
+
+**What the AI did:** explained the project again in simple Telugu-English with a
+three-deal example (₹35 lakh pipeline vs ₹21.5 lakh expected), the six things the system
+does, what "data leakage" means (like seeing the answer key before an exam), and the
+honest ML-vs-baseline result. It recommended running the project and studying the files
+one at a time before presenting it. No code changes.
+
+### Prompt 6 — 2026-11-03 12:08
+
+> ayithe ee project frotend kuda manchiga chey chesi naku evvi
+
+*(Telugu, meaning: "Then make the project's frontend nice as well and give it to me.")*
+
+**What the AI did:** redesigned the Streamlit dashboard (new layout, a forecast range strip,
+interactive charts with tooltips, a Risks tab, responsive cards and a colour theme),
+reviewed it with browser screenshots at two screen widths, fixed the problems it found
+(listed in `AI_USAGE.md`), updated the dashboard tests and the docs, and committed it.

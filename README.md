@@ -31,7 +31,7 @@ py -m venv .venv
 pip install -r requirements.txt
 
 python run_pipeline.py            # generate data, validate, train, forecast (about 10-20 s)
-pytest                            # 79 tests
+pytest                            # 80 tests
 streamlit run dashboard/app.py    # dashboard at http://localhost:8501
 ```
 
@@ -42,7 +42,7 @@ thresholds). The dataset size is chosen with `--scale full` or `$env:SFS_SCALE =
 
 | What to check | Command | Expected result |
 |---|---|---|
-| All tests pass | `pytest` | `79 passed` (dashboard tests are skipped until the pipeline has run) |
+| All tests pass | `pytest` | `80 passed` after the pipeline has run (before that, the 3 dashboard tests are skipped) |
 | Data is reproducible | `python -m src.data_generation --check-reproducibility` | `checksums identical: True` and `[OK ]` for every file |
 | Clean data is valid | `python run_pipeline.py` → step 2 | `Clean data : 110,591 rows, 0 errors, 0 warnings` |
 | Validation catches errors | same output, step 2 | `injected anomalies detected: 16/16` |
@@ -106,7 +106,7 @@ sales-forecasting-system/
 │   ├── business_insights.py   risk flags and summaries
 │   └── database.py            SQLite load and query helpers
 ├── dashboard/app.py           Streamlit dashboard
-├── tests/                     79 automated tests (pytest)
+├── tests/                     80 automated tests (pytest)
 ├── data/
 │   ├── raw/                   clean generated tables (CSV) + manifest.json
 │   ├── ground_truth/          actual outcomes + anomaly labels (never used as features)
@@ -331,13 +331,23 @@ summary lists the opportunity IDs it is based on.
 
 ## 11. Dashboard
 
-Five tabs: **Overview** (pipeline, expected bookings, scenarios, open/stale/high-risk
-counts), **Forecast analysis** (scenario chart, monthly split, forecast vs actual,
-accuracy tables), **Pipeline analysis** (stage, region via SQLite query, rep, age,
-risks and insights), **Data quality** (summaries, categories, downloadable reports,
-detection check) and **Opportunity explorer** (search, risk filter, CSV download).
-Sidebar filters: expected close date range, region, sales rep, stage. When filters are
-active, scenarios are recalculated for the filtered deals.
+![Dashboard overview](docs/images/dashboard_overview.png)
+
+Six tabs:
+
+| Tab | What it shows |
+|---|---|
+| **Overview** | The Base forecast with a range strip (Downside, Base, Upside and quota), open pipeline, open/stale/high-risk counts, expected bookings by stage, and the deals to look at first |
+| **Forecast analysis** | Backtest chart of every method vs actual bookings, accuracy tables, the forecast split by month, and whether past results landed inside the simulated range |
+| **Pipeline analysis** | Regions against quota (queried from SQLite), deals by stage and by age, pipeline by rep |
+| **Risks** | Counts for each risk flag, every flagged deal with its reasons, pipeline concentration, reps where a review is suggested |
+| **Data quality** | Results for the clean data and the planted-error sample, issue categories, downloadable reports, and whether every planted error was found |
+| **Opportunity explorer** | Searchable table of every open deal with amount, stage, probability, expected booking, last activity and risk |
+
+Sidebar filters: expected close date range, region, sales rep and stage. When filters
+are on, the scenarios and quota comparison are recalculated for the filtered deals.
+Every chart has hover tooltips. The colours come from a colour-blind-checked palette,
+and risk levels are always shown with a text label as well as a colour.
 
 ## 12. Important code, explained simply
 

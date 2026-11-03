@@ -128,11 +128,11 @@ scales are tested**. Running full scale is what exposed the quota bug.
 | Database | Schema rules | Negative amount and unknown rep are rejected by SQLite |
 | Dashboard | Loads and filters | Streamlit `AppTest`: no exceptions, metrics present, filters work |
 
-Tests use a small "tiny" dataset (900 deals), so all 79 tests run in about 16 seconds.
+Tests use a small "tiny" dataset (900 deals), so all 80 tests run in about 20 seconds.
 
 ## 5. How we know it works
 
-1. **79/79 tests pass** on Python 3.11 and 3.13 (Linux). GitHub Actions re-runs the
+1. **80/80 tests pass** on Python 3.11 and 3.13 (Linux). GitHub Actions re-runs the
    tests and the pipeline on **Windows and Ubuntu** for every push; the result is in
    the repository's Actions tab.
 2. **The full pipeline runs end to end** from a fresh clone at both scales.

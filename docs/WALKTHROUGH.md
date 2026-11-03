@@ -38,10 +38,11 @@ Each step is its own module in `src/`.
 - "ML ranks deals better (AUC 0.88 vs 0.78) but did not beat the simple baseline on
   starter totals, so the system uses the baseline. On full data Random Forest won slightly."
 
-**6. Scenarios and risks (1 min).** *Overview* tab:
-- scenario range; the simulation alone was too narrow (50% coverage), so the range also
-  uses past errors.
-- *Opportunity explorer*: tick "only risk flags", open one deal and read its reasons.
+**6. Scenarios and risks (1 min).** *Overview* and *Risks* tabs:
+- *Overview*: the range strip (Downside, Base, Upside, quota). The simulation alone was too
+  narrow (50% coverage, shown in *Forecast analysis*), so the range also uses past errors.
+- *Risks*: pick one flagged deal and read its reasons; mention the slip-rule check (40% vs 17%).
+- Use a sidebar filter (e.g. one region) to show the forecast and range recalculating.
 
 **7. AI use (1 min).** "Claude wrote most of the code. I set the requirements and rules,
 and reviewed and validated the result. Here is what I checked." Show `AI_USAGE.md`.
