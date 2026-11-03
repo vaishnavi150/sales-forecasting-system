@@ -125,13 +125,27 @@ def make_model(kind: str, seed: int = config.RANDOM_SEED) -> Pipeline:
     return Pipeline([("prep", pre), ("model", model)])
 
 
-def train_model(kind: str, train: pd.DataFrame, seed: int = config.RANDOM_SEED) -> Pipeline:
+def train_model(kind: str, train: pd.DataFrame, seed: int = config.RANDOM_SEED,
+                weight_by_amount: bool = True) -> Pipeline:
+    """
+    Fit a model on labelled snapshot rows.
+
+    weight_by_amount: we forecast booking VALUE, so a mistake on a
+    1-crore deal matters more than one on a 1-lakh deal. Giving each
+    training row a weight proportional to its deal amount tells the
+    model to pay more attention to big deals. (In our backtest this
+    lowered the ML models' WAPE; see README.)
+    """
     if train.empty:
         raise ValueError("No training data available.")
     if train["won_in_horizon"].nunique() < 2:
         raise ValueError("Training data must contain both won and not-won deals.")
     model = make_model(kind, seed)
-    model.fit(train[NUMERIC_FEATURES + CATEGORICAL_FEATURES], train["won_in_horizon"])
+    weights = None
+    if weight_by_amount:
+        weights = (train["deal_amount"] / train["deal_amount"].mean()).to_numpy()
+    model.fit(train[NUMERIC_FEATURES + CATEGORICAL_FEATURES], train["won_in_horizon"],
+              model__sample_weight=weights)
     return model
 
 
