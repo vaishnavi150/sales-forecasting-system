@@ -9,6 +9,52 @@ forecasts were.
 > **All data is synthetic** (computer-generated with a fixed random seed).
 > None of the numbers describe a real company.
 
+| Read this | For |
+|---|---|
+| [Quick start](#quick-start) | Install, run and verify in about 5 minutes |
+| [`docs/DECISIONS.md`](docs/DECISIONS.md) | The reasoning: assumptions, key decisions, trade-offs, testing approach, evidence, limitations |
+| [`AI_USAGE.md`](AI_USAGE.md) | How AI (Claude) was used, what it got wrong, and what I reviewed and validated |
+| [`PROMPT_HISTORY.md`](PROMPT_HISTORY.md) | Every prompt, word for word |
+| [`docs/WALKTHROUGH.md`](docs/WALKTHROUGH.md) | A 10-minute demo script and likely questions |
+| Commit history | One commit per development phase, plus separate commits for real fixes and design changes |
+
+## Quick start
+
+Needs **Python 3.11+** and **Git**. Commands are for Windows PowerShell (VS Code
+terminal). On macOS/Linux use `python3 -m venv .venv` and `source .venv/bin/activate`.
+
+```powershell
+git clone https://github.com/<your-username>/sales-forecasting-system.git
+cd sales-forecasting-system
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+
+python run_pipeline.py            # generate data, validate, train, forecast (about 10-20 s)
+pytest                            # 79 tests
+streamlit run dashboard/app.py    # dashboard at http://localhost:8501
+```
+
+No other configuration is needed. Optional settings are in `config.py` (seed, dates,
+thresholds). The dataset size is chosen with `--scale full` or `$env:SFS_SCALE = "full"`.
+
+### Verify key behaviour
+
+| What to check | Command | Expected result |
+|---|---|---|
+| All tests pass | `pytest` | `79 passed` (dashboard tests are skipped until the pipeline has run) |
+| Data is reproducible | `python -m src.data_generation --check-reproducibility` | `checksums identical: True` and `[OK ]` for every file |
+| Clean data is valid | `python run_pipeline.py` → step 2 | `Clean data : 110,591 rows, 0 errors, 0 warnings` |
+| Validation catches errors | same output, step 2 | `injected anomalies detected: 16/16` |
+| No future information in snapshots | same output, step 3 | `time-consistency issues: 0` |
+| Leakage is impossible by construction | `pytest tests/test_feature_engineering.py -v` | features identical with all future data removed |
+| Forecast vs actual, by method | same output, steps 4-5 | quarterly table and WAPE/Brier comparison |
+| Scenarios | same output, step 6 | `Downside 43.96 cr / Base 54.38 cr / Upside 61.70 cr` |
+| Same code, bigger data | `python run_pipeline.py --scale full` | 20,000 opportunities, 0 errors, 16/16 detected |
+
+Every push also runs these checks on Windows and Ubuntu in GitHub Actions
+(`.github/workflows/ci.yml`).
+
 ---
 
 ## 1. Business problem
@@ -40,7 +86,14 @@ sales-forecasting-system/
 ├── pytest.ini                 test settings
 ├── .streamlit/config.toml     dashboard settings
 ├── sql/schema.sql             SQLite tables, keys and rules
-├── docs/data_dictionary.md    every table and field explained
+├── AI_USAGE.md                honest AI disclosure
+├── PROMPT_HISTORY.md          every prompt, word for word
+├── prompts/                   full project instructions + original specification
+├── .github/workflows/ci.yml   automatic tests on Windows + Ubuntu
+├── docs/
+│   ├── DECISIONS.md           reasoning, trade-offs, evidence
+│   ├── WALKTHROUGH.md         demo script + likely questions
+│   └── data_dictionary.md     every table and field explained
 ├── src/
 │   ├── data_generation.py     synthetic data (master → events → derived tables)
 │   ├── error_injection.py     small dataset with labelled, deliberate errors

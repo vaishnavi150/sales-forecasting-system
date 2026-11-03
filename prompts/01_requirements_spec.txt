@@ -1,0 +1,48 @@
+Business Context / Problem
+Forecast bookings from opportunity stages, age, historical conversion and rep activity with scenario-based uncertainty.
+
+Objective and Scope
+Build a working solution for this end-to-end workflow: Forecast bookings from opportunity stages, age, historical conversion and rep activity with scenario-based uncertainty. The solution should expose key decisions and exceptions, preserve traceability, and produce measurable outputs. Medium complexity means multiple related entities, conditional rules, at least one exception path and meaningful evaluation metrics.
+
+Primary Actors / Systems
+Customer/prospect, marketing/sales operations, support agent, analyst and system administrator
+
+Business Workflow and Rules
+1. Generate/reference master data first: SalesRep, Territory, Account, Opportunity, Stage.
+2. Generate dependent transaction/event records using valid parent IDs.
+3. Apply business logic: Define sales stages and probabilities; generate opportunities with amounts, close dates and products; record stage history and activities; create quotas and historical bookings; snapshot forecasts at fixed dates; simulate slippage and stage conversion outcomes.
+4. Persist state changes as explicit records/events where relevant; do not overwrite history.
+5. Generate outcomes and ground-truth labels from documented rules, not independent random assignment.
+
+Entities and Relationships
+Core entities: SalesRep, Territory, Account, Opportunity, Stage, StageHistory, Activity, Quota, HistoricalBooking, ForecastSnapshot. Define a primary key for every entity and foreign keys for every relationship. Document cardinality (1:1, 1:N, N:M), optional relationships, effective dates and lifecycle states. Use bridge tables for many-to-many relationships; retain event history for state changes; validate all joins. For deliberate anomaly cases, keep an issue_type/ground_truth label rather than silently corrupting unrelated rows.
+
+ID / Nomenclature Conventions
+REP-000001; OPP-2026-000001; STG-<opportunity-id>-001; QUOTA-<rep-id>-2026Q1; FCST-2026-01-31-001.
+
+Synthetic Data Generation Instructions (Granular)
+Step 1 — Write a data dictionary for: SalesRep, Territory, Account, Opportunity, Stage, StageHistory, Activity, Quota, HistoricalBooking, ForecastSnapshot. For each field specify type, required/optional, allowed values, units, uniqueness and validation rule.
+Step 2 — Create parent/master tables first, then child and event tables. Apply this domain-specific generation logic: Define sales stages and probabilities; generate opportunities with amounts, close dates and products; record stage history and activities; create quotas and historical bookings; snapshot forecasts at fixed dates; simulate slippage and stage conversion outcomes.
+Step 3 — Apply deterministic IDs and naming: REP-000001; OPP-2026-000001; STG-<opportunity-id>-001; QUOTA-<rep-id>-2026Q1; FCST-2026-01-31-001. Keep counters zero-padded, IDs immutable, and referenced IDs exactly consistent across files.
+Step 4 — Generate the baseline volume: Generate 2,000 reps/accounts, 20,000 opportunities and 8 quarters of snapshots. Include deal slippage, stale opportunities, seasonality and territory changes. Use a fixed seed (e.g. 20261022) and parameterize scale so starter and full datasets use the same generator.
+Step 5 — Generate valid baseline records first, then inject labelled edge cases: Forecast uses final outcome data; stage probability inconsistent with snapshot; duplicate opportunity counted; close date before creation; currency totals mixed.
+Step 6 — Calculate derived values (totals, balances, scores, statuses and dates) from source records rather than generating them independently.
+Step 7 — Produce a separate ground_truth.csv/json for known anomalies, expected decisions or labels; never leak it into input features.
+Step 8 — Run validation: primary-key uniqueness, foreign-key integrity, allowed enums, date ordering, arithmetic reconciliation, lifecycle transitions and duplicate checks.
+Step 9 — Export CSV/JSON/SQL seed data plus README, schema/data dictionary, generator command, fixed seed, source manifest and validation summary.
+Step 10 — Regenerate twice with the same seed and compare row counts/checksums to demonstrate reproducibility.
+
+Suggested Volume and Coverage
+Generate 2,000 reps/accounts, 20,000 opportunities and 8 quarters of snapshots. Include deal slippage, stale opportunities, seasonality and territory changes.
+
+Required Edge Cases / Negative Scenarios
+Forecast uses final outcome data; stage probability inconsistent with snapshot; duplicate opportunity counted; close date before creation; currency totals mixed.
+
+Validation Rules / Acceptance Criteria
+Forecast snapshots are time-consistent; weighted pipeline reconciles; error metrics can be calculated by horizon/segment; scenario assumptions are documented.
+
+Evaluation Focus for Generated Data
+Review: (a) realistic distributions and meaningful variation; (b) consistent IDs and valid joins; (c) dependency/lifecycle consistency across entities; (d) correct derived values and reconciliation; (e) normal, boundary, failure and exception coverage; (f) separate ground truth; (g) fixed-seed reproducibility, documentation and lawful provenance.
+
+Public Data Guidance / Lawful Use
+External data is optional. If used, record source URL, dataset/version, retrieval date, license/terms, attribution, transformations and fields discarded. Use only data you are legally permitted to access and redistribute; do not bypass access controls or collect confidential/personal information. If licensing or suitability is unclear, use synthetic data and cite public reference data only for schema inspiration.
