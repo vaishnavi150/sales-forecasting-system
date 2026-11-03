@@ -1,0 +1,43 @@
+# ------------------------------------------------------------
+# .gitignore - files Git should NOT save in version history
+# ------------------------------------------------------------
+
+# Python virtual environment (each computer creates its own)
+.venv/
+venv/
+env/
+
+# Python cache files (created automatically when code runs)
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Generated data (can always be re-created from the generator + seed)
+data/raw/*
+data/processed/*
+data/sample/*
+data/ground_truth/*
+*.db
+*.sqlite
+*.sqlite3
+
+# Generated reports and trained models
+reports/*
+*.pkl
+*.joblib
+
+# Keep the empty folders in Git (a .gitkeep file holds each folder)
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/sample/.gitkeep
+!data/ground_truth/.gitkeep
+!reports/.gitkeep
+
+# Streamlit local secrets
+.streamlit/secrets.toml
+
+# Editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

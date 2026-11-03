@@ -1,0 +1,24 @@
+# ------------------------------------------------------------
+# Sales Forecasting System - Python packages
+# Install with:  pip install -r requirements.txt
+#
+# We use version RANGES (>= minimum, < next major version).
+# This lets pip pick a version that works with your Python
+# (3.11, 3.12 or 3.13) while avoiding big breaking upgrades.
+# ------------------------------------------------------------
+
+# Data processing: tables (DataFrames) and fast maths
+pandas>=2.2,<3.0
+numpy>=1.26,<3.0
+
+# Machine learning: Logistic Regression, Random Forest, metrics
+scikit-learn>=1.5,<2.0
+
+# Charts for reports
+matplotlib>=3.8,<4.0
+
+# Interactive web dashboard
+streamlit>=1.38,<2.0
+
+# Automated testing
+pytest>=8.0,<10.0
