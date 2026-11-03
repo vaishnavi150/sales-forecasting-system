@@ -10,9 +10,11 @@ RULES (each threshold lives in config.py)
 stale             : no activity for STALE_ACTIVITY_DAYS (30) days or more
 overdue           : expected close date is already in the past
 large_low_prob    : deal amount in the top 10% AND win probability < 30%
-slip_risk         : expected to close this quarter, but the model's chance
-                    of winning THIS quarter is less than half of the stage's
-                    historical win rate (the deal is likely to move later)
+slip_risk         : expected to close this quarter, but still in an EARLY stage
+                    (Prospecting/Qualification) with the close date 45+ days
+                    away, and the date has not been reviewed (no pushes yet).
+                    This rule was checked against history: see
+                    slip_rule_backtest() and reports/insights.json.
 
 About sales reps: we only report FACTS about their open deals (how many
 are flagged). We do not rate or judge people; a high share of flagged
@@ -34,22 +36,53 @@ FLAG_LABELS = {
 }
 
 
+EARLY_STAGES = ["Prospecting", "Qualification"]
+
+
+def slip_rule(df: pd.DataFrame, snapshot_date) -> pd.Series:
+    """True for deals expected this quarter that look too early to close in time."""
+    in_quarter = df["expected_close_date"] <= horizon_end(snapshot_date)
+    return (in_quarter & df["stage"].isin(EARLY_STAGES)
+            & (df["days_until_expected_close"] >= config.SLIP_MIN_DAYS_TO_CLOSE)
+            & (df["close_date_pushes"] == 0))
+
+
+def slip_rule_backtest(deal_predictions: pd.DataFrame, outcomes: pd.DataFrame) -> dict:
+    """
+    How well did the slip rule work in the past? For deals expected to close
+    in the forecast quarter, compare the share that did NOT close in that
+    quarter (slipped) for flagged vs all deals.
+    """
+    d = deal_predictions.merge(outcomes[["opportunity_id", "close_date"]], on="opportunity_id")
+    rows = []
+    for snap_date, g in d.groupby("snapshot_date"):
+        h_end = horizon_end(snap_date)
+        g = g[g["expected_close_date"] <= h_end].copy()
+        g["slipped"] = ~(g["close_date"] <= h_end)
+        g["flagged"] = slip_rule(g, snap_date)
+        rows.append(g)
+    allrows = pd.concat(rows)
+    flagged = allrows[allrows["flagged"]]
+    return {"deals_expected_in_quarter": int(len(allrows)),
+            "overall_slip_rate": float(allrows["slipped"].mean()),
+            "flagged_deals": int(len(flagged)),
+            "flagged_slip_rate": float(flagged["slipped"].mean()) if len(flagged) else None}
+
+
 def flag_opportunities(feats: pd.DataFrame, risk_prob_col: str, forecast_prob_col: str,
                        snapshot_date) -> pd.DataFrame:
     """Add flag columns, a readable risk_reasons text and a risk_level."""
     df = feats.copy()
-    h_end = horizon_end(snapshot_date)
     p = df[risk_prob_col]
     df["win_probability"] = p
     df["forecast_probability"] = df[forecast_prob_col]
     df["expected_booking"] = df["deal_amount"] * df["forecast_probability"]
 
     large_cutoff = df["deal_amount"].quantile(config.LARGE_DEAL_PERCENTILE) if len(df) else 0
-    in_quarter = df["expected_close_date"] <= h_end
     df["flag_stale"] = df["days_since_last_activity"] >= config.STALE_ACTIVITY_DAYS
     df["flag_overdue"] = df["days_until_expected_close"] < 0
     df["flag_large_low_prob"] = (df["deal_amount"] >= large_cutoff) & (p < config.LOW_WIN_PROBABILITY)
-    df["flag_slip_risk"] = in_quarter & (p < 0.5 * df["stage_conversion_rate"])
+    df["flag_slip_risk"] = slip_rule(df, snapshot_date)
 
     flags = list(FLAG_LABELS)
     df["risk_flag_count"] = df[flags].sum(axis=1)
@@ -68,7 +101,7 @@ def _ids(series: pd.Series, limit: int = 50) -> str:
 
 
 def rep_followup(flagged: pd.DataFrame, reps: pd.DataFrame,
-                 min_open: int = 3, min_share: float = 0.5) -> pd.DataFrame:
+                 min_open: int = 4, min_share: float = 0.5) -> pd.DataFrame:
     """Reps whose open pipeline has a high share of flagged deals."""
     df = flagged.assign(is_flagged=flagged["risk_flag_count"] > 0)
     g = df.groupby("rep_id").agg(open_deals=("opportunity_id", "count"),

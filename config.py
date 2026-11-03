@@ -169,6 +169,7 @@ STALE_ACTIVITY_DAYS = 30           # no activity for 30+ days -> stale
 LARGE_DEAL_PERCENTILE = 0.90       # top 10% of deal amounts = "large"
 LOW_WIN_PROBABILITY = 0.30         # below 30% = "low" win chance
 CONCENTRATION_SHARE = 0.20         # one account/rep > 20% of pipeline -> risk
+SLIP_MIN_DAYS_TO_CLOSE = 45        # early-stage deal, close date 45+ days away -> slip risk
 
 # Scenario simulation settings (used in Phase 8)
 SIMULATION_RUNS = 10_000

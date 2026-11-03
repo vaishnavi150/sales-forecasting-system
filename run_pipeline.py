@@ -221,6 +221,7 @@ def main() -> None:
     gaps = bi.region_gaps(flagged, tables["quotas"], tables["sales_reps"], scen["forecast_quarter"])
     conc = bi.concentration(flagged, tables["accounts"])
     summary = bi.insight_summary(flagged)
+    summary["slip_rule_backtest"] = bi.slip_rule_backtest(deals, tables["opportunity_outcomes"])
     monthly = monthly_breakdown(flagged, live_date)
     keep = ["opportunity_id", "account_id", "account_name", "rep_id", "rep_name", "region",
             "industry", "account_size", "product", "stage", "deal_amount", "opportunity_created_date",
@@ -237,8 +238,11 @@ def main() -> None:
     monthly.to_csv(reports / "monthly_forecast.csv", index=False)
     (reports / "insights.json").write_text(json.dumps(to_jsonable(summary), indent=2))
     for k, v in summary.items():
-        if isinstance(v, dict):
+        if isinstance(v, dict) and "label" in v:
             print(f"   {v['label']:<40}{v['count']:>5} deals  ({v['pipeline_value'] / CRORE:,.1f} cr)")
+    sb = summary["slip_rule_backtest"]
+    print(f"   Slip rule check (history): flagged deals slipped {sb['flagged_slip_rate']:.0%} "
+          f"vs {sb['overall_slip_rate']:.0%} of all deals expected in-quarter")
     print(f"   Reps with >=50% of open deals flagged: {len(reps_follow)}")
 
     # 8 -------------------------------------------------------------------
