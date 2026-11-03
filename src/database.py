@@ -10,6 +10,7 @@ and so the database itself enforces rules (unique IDs, foreign keys,
 from __future__ import annotations
 
 import sqlite3
+from contextlib import contextmanager
 from pathlib import Path
 
 import pandas as pd
@@ -33,10 +34,23 @@ def _dates_to_text(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-def connect(db_path: Path = config.DATABASE_PATH) -> sqlite3.Connection:
+@contextmanager
+def connect(db_path: Path = config.DATABASE_PATH):
+    """
+    Open the database, commit if everything worked (roll back on error),
+    and ALWAYS close it. Closing matters on Windows: an open connection
+    keeps the .db file locked.
+
+        with connect() as conn:
+            conn.execute(...)
+    """
     conn = sqlite3.connect(db_path)
-    conn.execute("PRAGMA foreign_keys = ON")
-    return conn
+    try:
+        conn.execute("PRAGMA foreign_keys = ON")
+        with conn:            # commit / rollback
+            yield conn
+    finally:
+        conn.close()
 
 
 def create_database(tables: dict[str, pd.DataFrame],
@@ -45,7 +59,7 @@ def create_database(tables: dict[str, pd.DataFrame],
     """Create all tables from schema.sql and load the data. Returns row counts."""
     db_path.parent.mkdir(parents=True, exist_ok=True)
     with connect(db_path) as conn:
-        conn.executescript(schema_path.read_text())
+        conn.executescript(schema_path.read_text(encoding="utf-8"))
         counts = {}
         for name in LOAD_ORDER:
             if name in tables:

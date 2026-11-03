@@ -60,10 +60,10 @@ def load_outputs() -> dict:
         "detection": pd.read_csv(REPORTS / "data_quality" / "sample_detection.csv"),
     }
     for name in ["scenarios", "insights", "run_info"]:
-        out[name] = json.loads((REPORTS / f"{name}.json").read_text())
+        out[name] = json.loads((REPORTS / f"{name}.json").read_text(encoding="utf-8"))
     for name in ["clean", "sample"]:
-        out[f"dq_{name}"] = json.loads((REPORTS / "data_quality" / f"{name}_summary.json").read_text())
-        out[f"dq_{name}_md"] = (REPORTS / "data_quality" / f"{name}_report.md").read_text()
+        out[f"dq_{name}"] = json.loads((REPORTS / "data_quality" / f"{name}_summary.json").read_text(encoding="utf-8"))
+        out[f"dq_{name}_md"] = (REPORTS / "data_quality" / f"{name}_report.md").read_text(encoding="utf-8")
     return out
 
 

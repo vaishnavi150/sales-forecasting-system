@@ -644,7 +644,7 @@ def run_generation(scale: ScaleConfig, seed: int = config.RANDOM_SEED,
         "injected_anomalies": int(len(labels)),
         "sha256": checksums,
     }
-    (raw_dir / "manifest.json").write_text(json.dumps(manifest, indent=2))
+    (raw_dir / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     return manifest
 
 

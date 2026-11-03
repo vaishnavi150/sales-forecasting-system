@@ -443,8 +443,8 @@ def summary_to_markdown(summary: dict) -> str:
 def write_report(issues: pd.DataFrame, summary: dict, folder: Path, prefix: str) -> None:
     folder.mkdir(parents=True, exist_ok=True)
     issues.to_csv(folder / f"{prefix}_issues.csv", index=False, lineterminator="\n")
-    (folder / f"{prefix}_summary.json").write_text(json.dumps(summary, indent=2))
-    (folder / f"{prefix}_report.md").write_text(summary_to_markdown(summary))
+    (folder / f"{prefix}_summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    (folder / f"{prefix}_report.md").write_text(summary_to_markdown(summary), encoding="utf-8")
 
 
 def compare_with_labels(issues: pd.DataFrame, labels: pd.DataFrame) -> pd.DataFrame:

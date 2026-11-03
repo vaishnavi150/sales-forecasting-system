@@ -205,7 +205,7 @@ def main() -> None:
     # Scenario totals for every method, for comparison on the dashboard.
     scen["all_methods_base"] = {m: float((live["deal_amount"] * live[f"p_{m}"]).sum())
                                 for m in forecasting.METHODS}
-    (reports / "scenarios.json").write_text(json.dumps(to_jsonable(scen), indent=2))
+    (reports / "scenarios.json").write_text(json.dumps(to_jsonable(scen), indent=2), encoding="utf-8")
     print(f"   Forecast quarter {scen['forecast_quarter']} (open deals: {len(live)})")
     print(f"   Downside {scen['downside'] / CRORE:,.2f} cr | Base {scen['base'] / CRORE:,.2f} cr | "
           f"Upside {scen['upside'] / CRORE:,.2f} cr")
@@ -236,7 +236,7 @@ def main() -> None:
     gaps.to_csv(reports / "region_gaps.csv", index=False)
     conc.to_csv(reports / "concentration.csv", index=False)
     monthly.to_csv(reports / "monthly_forecast.csv", index=False)
-    (reports / "insights.json").write_text(json.dumps(to_jsonable(summary), indent=2))
+    (reports / "insights.json").write_text(json.dumps(to_jsonable(summary), indent=2), encoding="utf-8")
     for k, v in summary.items():
         if isinstance(v, dict) and "label" in v:
             print(f"   {v['label']:<40}{v['count']:>5} deals  ({v['pipeline_value'] / CRORE:,.1f} cr)")
@@ -266,7 +266,7 @@ def main() -> None:
         "sample_anomalies_detected": f"{int(detection['detected'].sum())}/{len(detection)}",
         "runtime_seconds": round(time.time() - started, 1),
     }
-    (reports / "run_info.json").write_text(json.dumps(run_info, indent=2))
+    (reports / "run_info.json").write_text(json.dumps(run_info, indent=2), encoding="utf-8")
     print(f"\nDone in {run_info['runtime_seconds']} s. Start the dashboard with:"
           f"\n    streamlit run dashboard/app.py")
 
