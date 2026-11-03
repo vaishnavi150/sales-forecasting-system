@@ -149,8 +149,9 @@ def build_error_sample(tables: dict[str, pd.DataFrame], seed: int = config.RANDO
             "Snapshot row in USD would be added to INR totals.")
     # 16. Duplicate opportunity counted twice in the same snapshot
     ix = snap_ix[4]
+    dup_key = key(ix)  # compute the ID before the row is copied
     s_snap = pd.concat([s_snap, s_snap.loc[[ix]]])
-    _record(labels, "forecast_snapshots", key(ix), "duplicate_snapshot_row",
+    _record(labels, "forecast_snapshots", dup_key, "duplicate_snapshot_row",
             "The same opportunity is counted twice in one snapshot.")
 
     sample = {
