@@ -1,0 +1,7 @@
+# Streamlit settings for this project
+[browser]
+# Do not send anonymous usage statistics to Streamlit.
+gatherUsageStats = false
+
+[theme]
+base = "light"

@@ -18,7 +18,7 @@ scikit-learn>=1.5,<2.0
 matplotlib>=3.8,<4.0
 
 # Interactive web dashboard
-streamlit>=1.38,<2.0
+streamlit>=1.50,<2.0
 
 # Automated testing
 pytest>=8.0,<10.0
