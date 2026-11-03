@@ -45,6 +45,7 @@ PROCESSED_DATA_DIR = DATA_DIR / "processed"      # features for modelling
 SAMPLE_DATA_DIR = DATA_DIR / "sample"            # small dataset with injected errors
 GROUND_TRUTH_DIR = DATA_DIR / "ground_truth"     # actual outcomes + anomaly labels
 REPORTS_DIR = PROJECT_ROOT / "reports"           # quality reports, metrics, charts
+FIGURES_DIR = REPORTS_DIR / "figures"            # matplotlib charts (PNG)
 SQL_DIR = PROJECT_ROOT / "sql"                   # database schema
 DATABASE_PATH = DATA_DIR / "sales_forecasting.db"  # the SQLite database file
 
@@ -80,6 +81,13 @@ SNAPSHOT_DATES: list[date] = [
 ]
 
 FORECAST_HORIZON_MONTHS = 3   # we forecast the NEXT quarter (3 months)
+
+# The "live" forecast is made on the last day of available data.
+# It forecasts Q4 2026, whose actual results are not known yet.
+LIVE_SNAPSHOT_DATE = DATA_END_DATE
+
+# Quotas are created for every quarter from Q1 2024 to Q4 2026.
+QUOTA_YEARS = [2024, 2025, 2026]
 
 # ======================================================================
 # 4. CURRENCY
@@ -236,7 +244,7 @@ def get_config(scale_name: str | None = None) -> ProjectConfig:
 def ensure_directories() -> None:
     """Create the data and report folders if they do not exist yet."""
     for folder in [RAW_DATA_DIR, PROCESSED_DATA_DIR, SAMPLE_DATA_DIR,
-                   GROUND_TRUTH_DIR, REPORTS_DIR]:
+                   GROUND_TRUTH_DIR, REPORTS_DIR, FIGURES_DIR]:
         folder.mkdir(parents=True, exist_ok=True)
 
 
