@@ -1,0 +1,50 @@
+# GitHub Actions: proves the project installs and runs on a clean machine.
+# Runs on every push and pull request, on Windows and Ubuntu, Python 3.11 and 3.12.
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: ${{ matrix.os }} / Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Unit tests (before any data exists)
+        run: pytest -q
+
+      - name: Reproducibility check (generate twice, compare checksums)
+        run: python -m src.data_generation --check-reproducibility
+
+      - name: Run the full pipeline (starter scale)
+        run: python run_pipeline.py
+
+      - name: All tests again (now including the dashboard tests)
+        run: pytest -v
+
+      - name: Upload reports
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: reports/
