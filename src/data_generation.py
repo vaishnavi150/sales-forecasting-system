@@ -536,7 +536,9 @@ def generate_quotas(reps: pd.DataFrame, rng: np.random.Generator) -> pd.DataFram
                     continue
                 share = 1.0
                 if rep["joining_date"] > q_start:  # joined mid-quarter -> pro-rate
-                    share = (q_end - rep["joining_date"]).days / (q_end - q_start).days
+                    # +1 counts days inclusively, so a rep joining on the
+                    # last day of a quarter still gets 1 day of quota (never 0).
+                    share = ((q_end - rep["joining_date"]).days + 1) / ((q_end - q_start).days + 1)
                 amount = (TEAM_QUOTA[rep["team"]] * (1.06 ** (year - 2024))
                           * rng.uniform(0.9, 1.1) * share)
                 rows.append({

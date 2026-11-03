@@ -70,6 +70,17 @@ def test_bookings_reconcile_with_won_deals(tiny_tables):
     assert b["booking_amount"].sum() == won["deal_amount"].sum()
 
 
+def test_quotas_are_positive_even_for_last_day_joiners():
+    """Regression test: a rep joining on a quarter's last day once got a 0 quota."""
+    import numpy as np
+    from src.data_generation import generate_quotas
+    reps = pd.DataFrame({"rep_id": ["REP-000001"], "team": ["Field Sales"],
+                         "joining_date": [pd.Timestamp(2025, 9, 30)]})
+    q = generate_quotas(reps, np.random.default_rng(0))
+    assert (q["quota_amount"] > 0).all()
+    assert q.iloc[0]["quota_quarter"] == "2025Q3"
+
+
 def test_outcomes_agree_with_current_stage(tiny_tables):
     o = tiny_tables["opportunities"].merge(tiny_tables["opportunity_outcomes"], on="opportunity_id")
     expected = o["opportunity_stage"].map({config.WON_STAGE: "Won", config.LOST_STAGE: "Lost"}).fillna("Open")
